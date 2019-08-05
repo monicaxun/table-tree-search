@@ -106,53 +106,58 @@ console.log("dataList", dataList)
 // 若无，则为根节点，tree.push(currentNode)
 // 卡住了，无法判断在哪一层，插入多个子节点
 
-const generateData = (_level, _preKey, _tns) => {
-  const preKey = _preKey || '0'
-  const tns = _tns || gData
+// const generateData = (_level, _preKey, _tns) => {
+//   const preKey = _preKey || '0'
+//   const tns = _tns || gData
 
-  const children = []
-  for (let i = 0; i < x; i++) {
-    const key = `${preKey}-${i}`
-    tns.push({ title: key, key, scopedSlots: { title: 'title' }})
-    if (i < y) {
-      children.push(key)
-    }
-  }
-  if (_level < 0) {
-    return tns
-  }
-  const level = _level - 1
-  children.forEach((key, index) => {
-    tns[index].children = []
-    return generateData(level, key, tns[index].children)
-  })
-}
-generateData(z)
-// let resultTree = [];
-// const generateResultTree = (node) => {
-//   if(!node._inserted) {
-//     node._inserted = true;
-
-//     if(node.parentId) {
-//       let parentNode = dataList.filter(item => item.id === node.parentId)
-//       parentNode.children = [];
-//       parentNode.children.push(currentNode);
-//       resultTree = generateResultTree(parentNode);
-//     } else {
-//       resultTree.push(node)
+//   const children = []
+//   for (let i = 0; i < x; i++) {
+//     const key = `${preKey}-${i}`
+//     tns.push({ title: key, key, scopedSlots: { title: 'title' }})
+//     if (i < y) {
+//       children.push(key)
 //     }
-//   } else {
-//     // 
 //   }
-
-//   return resultTree;
+//   if (_level < 0) {
+//     return tns
+//   }
+//   const level = _level - 1
+//   children.forEach((key, index) => {
+//     tns[index].children = []
+//     return generateData(level, key, tns[index].children)
+//   })
 // }
+// generateData(z)
+let resultTree = [];
+const generateResultTree = (node) => {
+    if(node._inserted) {
+        debugger
+    } else {
+        node._inserted = true;
+
+        if(node.parentId) {
+          let parentNode = dataList.find(item => item.id === node.parentId)
+          parentNode.children = [];
+          parentNode.children.push(node);
+          generateResultTree(parentNode);
+        } else {
+          resultTree.push(node)
+        }
+    }
+
+  return resultTree;
+}
 
 
 
 function test1(propertyName) {
-    const filteredDataList = dataList.filter(item => item.id === "101" || item.name === "101")
-    generateResultTree(filteredDataList);
+    // 搜索出来所有数据，下面开始拼接树状结构
+    const filteredDataList = dataList.filter(item => item.id.includes("101") || item.name.includes("101"))
+    filteredDataList.forEach(node => {
+        // 无法多次查找，需要深度克隆一遍？
+        generateResultTree(node);
+    })
+    // generateResultTree(filteredDataList);
     console.log(resultTree);
 }
 

@@ -98,48 +98,17 @@ generateList(gData)
 
 console.log("dataList", dataList)
 
-// 怎么生成：
-// 查找满足条件的每一个元素
-// 判断是否有parentId ？ 
-// 若有，新建一个node=currentNode，同时，dataList查找id=parentId的元素,parentNode，设置元素inserted属性为true
-// 新建一个元素node=parentNode, node.children.push(currentNode)
-// 若无，则为根节点，tree.push(currentNode)
-// 卡住了，无法判断在哪一层，插入多个子节点
-
-// const generateData = (_level, _preKey, _tns) => {
-//   const preKey = _preKey || '0'
-//   const tns = _tns || gData
-
-//   const children = []
-//   for (let i = 0; i < x; i++) {
-//     const key = `${preKey}-${i}`
-//     tns.push({ title: key, key, scopedSlots: { title: 'title' }})
-//     if (i < y) {
-//       children.push(key)
-//     }
-//   }
-//   if (_level < 0) {
-//     return tns
-//   }
-//   const level = _level - 1
-//   children.forEach((key, index) => {
-//     tns[index].children = []
-//     return generateData(level, key, tns[index].children)
-//   })
-// }
-// generateData(z)
-let resultTree = [];
-const generateResultTree = (node) => {
+const generateResultTree = (node,clonedDataList, resultTree) => {
     if(node._inserted) {
-        debugger
+        // No logic
     } else {
         node._inserted = true;
 
         if(node.parentId) {
-          let parentNode = dataList.find(item => item.id === node.parentId)
+          let parentNode = clonedDataList.find(item => item.id === node.parentId)
           parentNode.children = [];
           parentNode.children.push(node);
-          generateResultTree(parentNode);
+          generateResultTree(parentNode, clonedDataList, resultTree);
         } else {
           resultTree.push(node)
         }
@@ -150,51 +119,35 @@ const generateResultTree = (node) => {
 
 
 
-function test1(propertyName) {
+function test1(keyword, props) {
     // 搜索出来所有数据，下面开始拼接树状结构
-    const filteredDataList = dataList.filter(item => item.id.includes("101") || item.name.includes("101"))
+    let dataListCloned = [];
+    let filteredDataList = new Set();
+    dataList.forEach(item => {
+      dataListCloned.push({...item});
+      if(typeof props === "string") {
+        if(item[props].includes(keyword)) {
+          filteredDataList.add({...item});
+        }
+      } else if(Array.isArray(props)) {
+        props.forEach(p => {
+          if(item[p].includes(keyword)) {
+            filteredDataList.add({...item})
+          }
+        })
+      }
+
+    })
+
+    let resultTree = [];
     filteredDataList.forEach(node => {
         // 无法多次查找，需要深度克隆一遍？
-        generateResultTree(node);
+        generateResultTree(node,dataListCloned, resultTree);
     })
     // generateResultTree(filteredDataList);
-    console.log(resultTree);
+    console.log("search keyword", keyword, resultTree);
 }
 
-// const getParentKey = (key, tree) => {
-//   let parentKey
-//   for (let i = 0; i < tree.length; i++) {
-//     const node = tree[i]
-//     if (node.children) {
-//       if (node.children.some(item => item.id === key)) {
-//         parentKey = node.id
-//       } else if (getParentKey(key, node.children)) {
-//         parentKey = getParentKey(key, node.children)
-//       }
-//     }
-//   }
-//   return parentKey
-// }
-
-// function test1(propertyName) {
-//     const parentKeys = dataList.map((item) => {
-//       if (item[propertyName] && item[propertyName].includes("101")) {
-//         return getParentKey(item.id, gData)
-//       }
-//       return null
-//     })
-
-//     const expandedKeys = new Set(parentKeys);
-//     // .filter((item, i, self) => {
-//     //   return item && self.indexOf(item) === i
-//     // })
-
-//     console.table(expandedKeys)
-//     // Object.assign(this, {
-//     //   expandedKeys,
-//     //   searchValue: "101",
-//     //   autoExpandParent: true,
-//     // })
-// }
-
-test1()
+test1("101", "id");
+test1("201", ["id", "name"])
+test1("301", ["id", "name"])

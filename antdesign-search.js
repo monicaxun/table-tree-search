@@ -106,7 +106,7 @@ const generateResultTree = (node,clonedDataList, resultTree) => {
 
         if(node.parentId) {
           let parentNode = clonedDataList.find(item => item.id === node.parentId)
-          parentNode.children = [];
+          parentNode.children = parentNode.children ? parentNode.children : [];
           parentNode.children.push(node);
           generateResultTree(parentNode, clonedDataList, resultTree);
         } else {
@@ -124,15 +124,16 @@ function test1(keyword, props) {
     let dataListCloned = [];
     let filteredDataList = new Set();
     dataList.forEach(item => {
-      dataListCloned.push({...item});
+      let cloneItem = {...item};
+      dataListCloned.push(cloneItem);
       if(typeof props === "string") {
         if(item[props].includes(keyword)) {
-          filteredDataList.add({...item});
+          filteredDataList.add(cloneItem);
         }
       } else if(Array.isArray(props)) {
         props.forEach(p => {
           if(item[p].includes(keyword)) {
-            filteredDataList.add({...item})
+            filteredDataList.add(cloneItem)
           }
         })
       }
@@ -150,4 +151,4 @@ function test1(keyword, props) {
 
 test1("101", "id");
 test1("201", ["id", "name"])
-test1("301", ["id", "name"])
+test1("03", ["id", "name"])
